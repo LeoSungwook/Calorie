@@ -1,19 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
+ <url>
     <loc>https://leosungwook.github.io/Calorie/</loc>
     <lastmod>2025-02-09</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
 </urlset>
-```
-
-4. **"Commit new file"** 클릭
-
-### 2단계: 확인하기
-
-1. 1-2분 기다리기
-2. 브라우저에서 접속:
-```
-   https://leosungwook.github.io/Calorie/sitemap.xml
