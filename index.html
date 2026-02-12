@@ -296,6 +296,31 @@
             font-weight: bold;
         }
 
+        .running-info {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .running-info h4 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .running-time {
+            font-size: 28px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .running-note {
+            font-size: 13px;
+            opacity: 0.9;
+            margin-top: 8px;
+        }
+
         .loading {
             text-align: center;
             padding: 20px;
@@ -594,8 +619,8 @@
         <!-- 음식 칼로리 검색 탭 -->
         <div id="food-tab" class="tab-content">
             <div class="single-container">
-                <h2>🍽️ 음식 칼로리 검색</h2>
-                <p class="subtitle">음식 이름을 입력하면 100g ~ 500g까지의 칼로리를 확인할 수 있습니다</p>
+                <h2>🍽️ 음식 칼로리 검색 | Food Calorie Search</h2>
+                <p class="subtitle">음식 이름을 입력하면 100g ~ 500g까지의 칼로리를 확인할 수 있습니다 | Enter a food name to check calories from 100g to 500g</p>
 
                 <div class="input-group">
                     <label for="food-search">음식 이름 | Food Name</label>
@@ -740,6 +765,10 @@
             '치킨': 230, '닭가슴살': 165, '계란': 155,
             '라면': 380, '떡볶이': 120, '김밥': 180,
             '비빔밥': 140, '냉면': 130, '짜장면': 150,
+            '만두': 200, '군만두': 220, '물만두': 180,
+            '피자': 266, '햄버거': 250, '치즈버거': 280,
+            '돈까스': 300, '탕수육': 250, '짬뽕': 100,
+            '칼국수': 90, '수제비': 85, '국밥': 100,
             
             // 과일
             '사과': 52, '바나나': 89, '오렌지': 47, '딸기': 32,
@@ -771,6 +800,7 @@
             'salmon': 208, 'tuna': 184, 'shrimp': 99,
             'broccoli': 34, 'carrot': 41, 'tomato': 18,
             'potato': 77, 'sweet potato': 86,
+            'dumpling': 200, 'noodles': 138, 'ramen': 380,
         };
 
         async function searchFoodCalories() {
@@ -798,22 +828,25 @@
 
             if (caloriesPer100g) {
                 displayFoodResult(searchInput, caloriesPer100g);
+                loading.style.display = 'none';
+                searchBtn.disabled = false;
             } else {
                 // 유사한 음식 찾기
                 const similarFoods = findSimilarFoods(searchInput);
                 if (similarFoods.length > 0) {
                     caloriesPer100g = foodDatabase[similarFoods[0]];
                     displayFoodResult(similarFoods[0], caloriesPer100g);
+                    loading.style.display = 'none';
+                    searchBtn.disabled = false;
                 } else {
-                    // 기본값 표시
-                    errorMsg.textContent = `"${searchInput}"에 대한 정확한 데이터를 찾을 수 없습니다. 일반적인 음식 칼로리를 표시합니다. | Cannot find exact data for "${searchInput}". Showing general food calories.`;
+                    // 데이터 없음 표시
+                    loading.style.display = 'none';
+                    searchBtn.disabled = false;
+                    result.classList.remove('show');
+                    errorMsg.textContent = `"${searchInput}"에 대한 칼로리 정보를 찾을 수 없습니다. 다른 음식을 검색해보세요. | Cannot find calorie information for "${searchInput}". Please try another food.`;
                     errorMsg.classList.add('show');
-                    displayFoodResult(searchInput, 150); // 기본값
                 }
             }
-
-            loading.style.display = 'none';
-            searchBtn.disabled = false;
         }
 
         function findSimilarFoods(searchTerm) {
@@ -836,11 +869,18 @@
             gramGrid.innerHTML = '';
             [100, 200, 300, 400, 500].forEach(grams => {
                 const calories = Math.round((caloriesPer100g * grams) / 100);
+                // 러닝으로 소모 시간 계산 (가벼운 러닝: 분당 약 8 kcal 소모)
+                const runningMinutes = Math.round(calories / 8);
+                
                 const gramItem = document.createElement('div');
                 gramItem.className = 'gram-item';
                 gramItem.innerHTML = `
                     <div class="gram-amount">${grams}g</div>
                     <div class="gram-calories">${calories} kcal</div>
+                    <div class="running-info">
+                        <div style="font-size: 14px; opacity: 0.9;">🏃 가벼운 러닝 | Light Running</div>
+                        <div class="running-time">${runningMinutes}분</div>
+                    </div>
                 `;
                 gramGrid.appendChild(gramItem);
             });
