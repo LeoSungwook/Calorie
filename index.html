@@ -4,17 +4,8 @@
     <meta charset="UTF-8">
     <meta name="google-site-verification" content="lZNrfYeiACULkr_Yo2Uahcdr6F1kNTeT7mlONWd-MHc" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-     <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-FS7JV0DG5Y');
-    </script>
-    <!-- End Google Analytics -->
     <title>칼로리 계산기 | Calorie Calculator</title>
-    <meta name="description" content="무료 칼로리 계산기 | Free Calorie Calculator - BMR, TDEE Calculator">
+    <meta name="description" content="무료 칼로리 계산기 | Free Calorie Calculator - BMR, TDEE Calculator & Food Calories">
     <style>
         * {
             margin: 0;
@@ -50,6 +41,42 @@
             margin: 0 auto;
         }
 
+        .tab-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            justify-content: center;
+        }
+
+        .tab-btn {
+            padding: 12px 30px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
         .calculators-wrapper {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -62,6 +89,15 @@
             border-radius: 20px;
             padding: 35px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .single-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            margin: 0 auto;
         }
 
         .lang-badge {
@@ -159,6 +195,11 @@
             transform: translateY(0);
         }
 
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
         .result {
             margin-top: 25px;
             padding: 25px;
@@ -204,6 +245,89 @@
         .calorie-value {
             font-size: 24px;
             font-weight: bold;
+        }
+
+        .food-result {
+            margin-top: 25px;
+            padding: 25px;
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            border-radius: 15px;
+            color: white;
+            display: none;
+        }
+
+        .food-result.show {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
+        .food-result h3 {
+            margin-bottom: 15px;
+            font-size: 22px;
+        }
+
+        .food-name {
+            font-size: 26px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .gram-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .gram-item {
+            background: rgba(255,255,255,0.25);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .gram-amount {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .gram-calories {
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #ff6b6b;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
         }
 
         .info-box {
@@ -260,6 +384,10 @@
             .info-grid {
                 grid-template-columns: 1fr;
             }
+
+            .gram-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
         @media (max-width: 768px) {
@@ -267,12 +395,20 @@
                 font-size: 28px;
             }
 
-            .calculator-container {
+            .calculator-container, .single-container {
                 padding: 25px;
             }
 
             h2 {
                 font-size: 24px;
+            }
+
+            .tab-buttons {
+                flex-direction: column;
+            }
+
+            .tab-btn {
+                width: 100%;
             }
         }
     </style>
@@ -280,168 +416,215 @@
 <body>
     <div class="header">
         <h1>🔥 칼로리 계산기 | Calorie Calculator</h1>
-        <p>한국어와 영어로 동시에 계산 가능 | Calculate in Korean and English simultaneously</p>
+        <p>체중 관리와 음식 칼로리를 한 번에! | Manage your weight and food calories!</p>
     </div>
 
     <div class="main-container">
-        <div class="calculators-wrapper">
-            <!-- 한국어 버전 -->
-            <div class="calculator-container">
-                <span class="lang-badge ko">🇰🇷 한국어</span>
-                <h2>칼로리 계산기</h2>
-                <p class="subtitle">하루 권장 칼로리를 계산해보세요</p>
+        <!-- 탭 버튼 -->
+        <div class="tab-buttons">
+            <button class="tab-btn active" onclick="switchTab('bmr')">💪 체중 관리 | Weight</button>
+            <button class="tab-btn" onclick="switchTab('food')">🍽️ 음식 칼로리 | Food</button>
+        </div>
 
-                <div class="input-group">
-                    <label>성별</label>
-                    <div class="radio-group">
-                        <div class="radio-option">
-                            <input type="radio" id="male-ko" name="gender-ko" value="male" checked onchange="syncToEnglish('gender', 'male')">
-                            <label for="male-ko">남성</label>
+        <!-- BMR/TDEE 계산기 탭 -->
+        <div id="bmr-tab" class="tab-content active">
+            <div class="calculators-wrapper">
+                <!-- 한국어 버전 -->
+                <div class="calculator-container">
+                    <span class="lang-badge ko">🇰🇷 한국어</span>
+                    <h2>칼로리 계산기</h2>
+                    <p class="subtitle">하루 권장 칼로리를 계산해보세요</p>
+
+                    <div class="input-group">
+                        <label>성별</label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="male-ko" name="gender-ko" value="male" checked onchange="syncToEnglish('gender', 'male')">
+                                <label for="male-ko">남성</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="female-ko" name="gender-ko" value="female" onchange="syncToEnglish('gender', 'female')">
+                                <label for="female-ko">여성</label>
+                            </div>
                         </div>
-                        <div class="radio-option">
-                            <input type="radio" id="female-ko" name="gender-ko" value="female" onchange="syncToEnglish('gender', 'female')">
-                            <label for="female-ko">여성</label>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="age-ko">나이 (세)</label>
+                        <input type="number" id="age-ko" placeholder="예: 25" min="1" max="120" oninput="syncToEnglish('age', this.value)">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="height-ko">키 (cm)</label>
+                        <input type="number" id="height-ko" placeholder="예: 170" min="100" max="250" oninput="syncToEnglish('height', this.value)">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="weight-ko">체중 (kg)</label>
+                        <input type="number" id="weight-ko" placeholder="예: 65" min="20" max="300" oninput="syncToEnglish('weight', this.value)">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="activity-ko">활동 수준</label>
+                        <select id="activity-ko" onchange="syncToEnglish('activity', this.value)">
+                            <option value="1.2">거의 운동 안함 (주 0-1회)</option>
+                            <option value="1.375">가벼운 활동 (주 2-3회)</option>
+                            <option value="1.55" selected>보통 활동 (주 3-5회)</option>
+                            <option value="1.725">활발한 활동 (주 6-7회)</option>
+                            <option value="1.9">매우 활발 (하루 2회 운동)</option>
+                        </select>
+                    </div>
+
+                    <button onclick="calculateCalories()">계산하기</button>
+
+                    <div id="result-ko" class="result">
+                        <h3>📊 계산 결과</h3>
+                        <div class="calorie-item">
+                            <div class="calorie-label">기초대사량 (BMR)</div>
+                            <div class="calorie-value" id="bmr-ko">-</div>
+                        </div>
+                        <div class="calorie-item">
+                            <div class="calorie-label">유지 칼로리 (TDEE)</div>
+                            <div class="calorie-value" id="tdee-ko">-</div>
+                        </div>
+                        <div class="calorie-item">
+                            <div class="calorie-label">다이어트 칼로리</div>
+                            <div class="calorie-value" id="diet-ko">-</div>
+                        </div>
+                        <div class="calorie-item">
+                            <div class="calorie-label">증량 칼로리</div>
+                            <div class="calorie-value" id="bulk-ko">-</div>
                         </div>
                     </div>
                 </div>
 
-                <div class="input-group">
-                    <label for="age-ko">나이 (세)</label>
-                    <input type="number" id="age-ko" placeholder="예: 25" min="1" max="120" oninput="syncToEnglish('age', this.value)">
-                </div>
+                <!-- 영어 버전 -->
+                <div class="calculator-container">
+                    <span class="lang-badge en">🇺🇸 English</span>
+                    <h2>Calorie Calculator</h2>
+                    <p class="subtitle">Calculate your daily calorie needs</p>
 
-                <div class="input-group">
-                    <label for="height-ko">키 (cm)</label>
-                    <input type="number" id="height-ko" placeholder="예: 170" min="100" max="250" oninput="syncToEnglish('height', this.value)">
-                </div>
-
-                <div class="input-group">
-                    <label for="weight-ko">체중 (kg)</label>
-                    <input type="number" id="weight-ko" placeholder="예: 65" min="20" max="300" oninput="syncToEnglish('weight', this.value)">
-                </div>
-
-                <div class="input-group">
-                    <label for="activity-ko">활동 수준</label>
-                    <select id="activity-ko" onchange="syncToEnglish('activity', this.value)">
-                        <option value="1.2">거의 운동 안함 (주 0-1회)</option>
-                        <option value="1.375">가벼운 활동 (주 2-3회)</option>
-                        <option value="1.55" selected>보통 활동 (주 3-5회)</option>
-                        <option value="1.725">활발한 활동 (주 6-7회)</option>
-                        <option value="1.9">매우 활발 (하루 2회 운동)</option>
-                    </select>
-                </div>
-
-                <button onclick="calculateCalories()">계산하기</button>
-
-                <div id="result-ko" class="result">
-                    <h3>📊 계산 결과</h3>
-                    <div class="calorie-item">
-                        <div class="calorie-label">기초대사량 (BMR)</div>
-                        <div class="calorie-value" id="bmr-ko">-</div>
+                    <div class="input-group">
+                        <label>Gender</label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="male-en" name="gender-en" value="male" checked onchange="syncToKorean('gender', 'male')">
+                                <label for="male-en">Male</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="female-en" name="gender-en" value="female" onchange="syncToKorean('gender', 'female')">
+                                <label for="female-en">Female</label>
+                            </div>
+                        </div>
                     </div>
-                    <div class="calorie-item">
-                        <div class="calorie-label">유지 칼로리 (TDEE)</div>
-                        <div class="calorie-value" id="tdee-ko">-</div>
+
+                    <div class="input-group">
+                        <label for="age-en">Age (years)</label>
+                        <input type="number" id="age-en" placeholder="e.g., 25" min="1" max="120" oninput="syncToKorean('age', this.value)">
                     </div>
-                    <div class="calorie-item">
-                        <div class="calorie-label">다이어트 칼로리</div>
-                        <div class="calorie-value" id="diet-ko">-</div>
+
+                    <div class="input-group">
+                        <label for="height-en">Height (cm)</label>
+                        <input type="number" id="height-en" placeholder="e.g., 170" min="100" max="250" oninput="syncToKorean('height', this.value)">
                     </div>
-                    <div class="calorie-item">
-                        <div class="calorie-label">증량 칼로리</div>
-                        <div class="calorie-value" id="bulk-ko">-</div>
+
+                    <div class="input-group">
+                        <label for="weight-en">Weight (kg)</label>
+                        <input type="number" id="weight-en" placeholder="e.g., 65" min="20" max="300" oninput="syncToKorean('weight', this.value)">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="activity-en">Activity Level</label>
+                        <select id="activity-en" onchange="syncToKorean('activity', this.value)">
+                            <option value="1.2">Sedentary (0-1 times/week)</option>
+                            <option value="1.375">Lightly Active (2-3 times/week)</option>
+                            <option value="1.55" selected>Moderately Active (3-5 times/week)</option>
+                            <option value="1.725">Very Active (6-7 times/week)</option>
+                            <option value="1.9">Extremely Active (2x per day)</option>
+                        </select>
+                    </div>
+
+                    <button onclick="calculateCalories()">Calculate</button>
+
+                    <div id="result-en" class="result">
+                        <h3>📊 Results</h3>
+                        <div class="calorie-item">
+                            <div class="calorie-label">Basal Metabolic Rate (BMR)</div>
+                            <div class="calorie-value" id="bmr-en">-</div>
+                        </div>
+                        <div class="calorie-item">
+                            <div class="calorie-label">Maintenance Calories (TDEE)</div>
+                            <div class="calorie-value" id="tdee-en">-</div>
+                        </div>
+                        <div class="calorie-item">
+                            <div class="calorie-label">Weight Loss Calories</div>
+                            <div class="calorie-value" id="diet-en">-</div>
+                        </div>
+                        <div class="calorie-item">
+                            <div class="calorie-label">Weight Gain Calories</div>
+                            <div class="calorie-value" id="bulk-en">-</div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 영어 버전 -->
-            <div class="calculator-container">
-                <span class="lang-badge en">🇺🇸 English</span>
-                <h2>Calorie Calculator</h2>
-                <p class="subtitle">Calculate your daily calorie needs</p>
-
-                <div class="input-group">
-                    <label>Gender</label>
-                    <div class="radio-group">
-                        <div class="radio-option">
-                            <input type="radio" id="male-en" name="gender-en" value="male" checked onchange="syncToKorean('gender', 'male')">
-                            <label for="male-en">Male</label>
-                        </div>
-                        <div class="radio-option">
-                            <input type="radio" id="female-en" name="gender-en" value="female" onchange="syncToKorean('gender', 'female')">
-                            <label for="female-en">Female</label>
-                        </div>
+            <div class="info-box">
+                <h3>💡 정보 안내 | Information Guide</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <strong>BMR | 기초대사량</strong>
+                        <p>아무것도 하지 않아도 소모되는 칼로리 | Calories burned at rest</p>
                     </div>
-                </div>
-
-                <div class="input-group">
-                    <label for="age-en">Age (years)</label>
-                    <input type="number" id="age-en" placeholder="e.g., 25" min="1" max="120" oninput="syncToKorean('age', this.value)">
-                </div>
-
-                <div class="input-group">
-                    <label for="height-en">Height (cm)</label>
-                    <input type="number" id="height-en" placeholder="e.g., 170" min="100" max="250" oninput="syncToKorean('height', this.value)">
-                </div>
-
-                <div class="input-group">
-                    <label for="weight-en">Weight (kg)</label>
-                    <input type="number" id="weight-en" placeholder="e.g., 65" min="20" max="300" oninput="syncToKorean('weight', this.value)">
-                </div>
-
-                <div class="input-group">
-                    <label for="activity-en">Activity Level</label>
-                    <select id="activity-en" onchange="syncToKorean('activity', this.value)">
-                        <option value="1.2">Sedentary (0-1 times/week)</option>
-                        <option value="1.375">Lightly Active (2-3 times/week)</option>
-                        <option value="1.55" selected>Moderately Active (3-5 times/week)</option>
-                        <option value="1.725">Very Active (6-7 times/week)</option>
-                        <option value="1.9">Extremely Active (2x per day)</option>
-                    </select>
-                </div>
-
-                <button onclick="calculateCalories()">Calculate</button>
-
-                <div id="result-en" class="result">
-                    <h3>📊 Results</h3>
-                    <div class="calorie-item">
-                        <div class="calorie-label">Basal Metabolic Rate (BMR)</div>
-                        <div class="calorie-value" id="bmr-en">-</div>
+                    <div class="info-item">
+                        <strong>TDEE | 총 에너지 소비량</strong>
+                        <p>일상 활동을 포함한 하루 소모 칼로리 | Total daily energy expenditure</p>
                     </div>
-                    <div class="calorie-item">
-                        <div class="calorie-label">Maintenance Calories (TDEE)</div>
-                        <div class="calorie-value" id="tdee-en">-</div>
+                    <div class="info-item">
+                        <strong>다이어트 | Weight Loss</strong>
+                        <p>체중 감량을 위한 권장 칼로리 (-500kcal) | Recommended for weight loss</p>
                     </div>
-                    <div class="calorie-item">
-                        <div class="calorie-label">Weight Loss Calories</div>
-                        <div class="calorie-value" id="diet-en">-</div>
-                    </div>
-                    <div class="calorie-item">
-                        <div class="calorie-label">Weight Gain Calories</div>
-                        <div class="calorie-value" id="bulk-en">-</div>
+                    <div class="info-item">
+                        <strong>증량 | Weight Gain</strong>
+                        <p>근육량 증가를 위한 권장 칼로리 (+500kcal) | Recommended for muscle gain</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="info-box">
-            <h3>💡 정보 안내 | Information Guide</h3>
-            <div class="info-grid">
-                <div class="info-item">
-                    <strong>BMR | 기초대사량</strong>
-                    <p>아무것도 하지 않아도 소모되는 칼로리 | Calories burned at rest</p>
+        <!-- 음식 칼로리 검색 탭 -->
+        <div id="food-tab" class="tab-content">
+            <div class="single-container">
+                <h2>🍽️ 음식 칼로리 검색</h2>
+                <p class="subtitle">음식 이름을 입력하면 100g ~ 500g까지의 칼로리를 확인할 수 있습니다</p>
+
+                <div class="input-group">
+                    <label for="food-search">음식 이름 | Food Name</label>
+                    <input type="text" id="food-search" placeholder="예: 사과, 치킨, 밥 / e.g., apple, chicken, rice">
                 </div>
-                <div class="info-item">
-                    <strong>TDEE | 총 에너지 소비량</strong>
-                    <p>일상 활동을 포함한 하루 소모 칼로리 | Total daily energy expenditure</p>
+
+                <button onclick="searchFoodCalories()" id="search-btn">검색하기 | Search</button>
+
+                <div id="loading" class="loading" style="display: none;">
+                    <div class="loading-spinner"></div>
+                    <p>검색 중입니다... | Searching...</p>
                 </div>
-                <div class="info-item">
-                    <strong>다이어트 | Weight Loss</strong>
-                    <p>체중 감량을 위한 권장 칼로리 (-500kcal) | Recommended for weight loss</p>
+
+                <div id="error-message" class="error-message"></div>
+
+                <div id="food-result" class="food-result">
+                    <h3>🍴 검색 결과</h3>
+                    <div class="food-name" id="food-name"></div>
+                    <div class="gram-grid" id="gram-grid"></div>
                 </div>
-                <div class="info-item">
-                    <strong>증량 | Weight Gain</strong>
-                    <p>근육량 증가를 위한 권장 칼로리 (+500kcal) | Recommended for muscle gain</p>
+
+                <div class="info-box" style="margin-top: 30px;">
+                    <h3>📝 사용 팁 | Tips</h3>
+                    <div class="info-item">
+                        <strong>정확한 검색을 위해</strong>
+                        <p>• 한국어나 영어로 음식 이름 입력 (예: 사과, apple)</p>
+                        <p>• 간단한 이름이 더 정확합니다 (예: 밥, 치킨, 바나나)</p>
+                        <p>• 100g 기준 칼로리를 자동으로 계산합니다</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -453,6 +636,23 @@
     </footer>
 
     <script>
+        // 탭 전환
+        function switchTab(tab) {
+            const tabs = document.querySelectorAll('.tab-content');
+            const buttons = document.querySelectorAll('.tab-btn');
+            
+            tabs.forEach(t => t.classList.remove('active'));
+            buttons.forEach(b => b.classList.remove('active'));
+            
+            if (tab === 'bmr') {
+                document.getElementById('bmr-tab').classList.add('active');
+                buttons[0].classList.add('active');
+            } else {
+                document.getElementById('food-tab').classList.add('active');
+                buttons[1].classList.add('active');
+            }
+        }
+
         // 한글 → 영어 동기화
         function syncToEnglish(field, value) {
             if (field === 'gender') {
@@ -492,7 +692,6 @@
         }
 
         function calculateCalories() {
-            // 한글 버전에서 데이터 가져오기
             const gender = document.querySelector('input[name="gender-ko"]:checked').value;
             const age = parseFloat(document.getElementById('age-ko').value);
             const height = parseFloat(document.getElementById('height-ko').value);
@@ -504,7 +703,6 @@
                 return;
             }
 
-            // Harris-Benedict 공식으로 BMR 계산
             let bmr;
             if (gender === 'male') {
                 bmr = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);
@@ -512,36 +710,154 @@
                 bmr = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
             }
 
-            // TDEE 계산
             const tdee = bmr * activity;
             const dietCalories = tdee - 500;
             const bulkCalories = tdee + 500;
 
-            // 한글 결과 표시
             document.getElementById('bmr-ko').textContent = Math.round(bmr) + ' kcal';
             document.getElementById('tdee-ko').textContent = Math.round(tdee) + ' kcal';
             document.getElementById('diet-ko').textContent = Math.round(dietCalories) + ' kcal';
             document.getElementById('bulk-ko').textContent = Math.round(bulkCalories) + ' kcal';
 
-            // 영어 결과 표시 (동일한 값)
             document.getElementById('bmr-en').textContent = Math.round(bmr) + ' kcal';
             document.getElementById('tdee-en').textContent = Math.round(tdee) + ' kcal';
             document.getElementById('diet-en').textContent = Math.round(dietCalories) + ' kcal';
             document.getElementById('bulk-en').textContent = Math.round(bulkCalories) + ' kcal';
 
-            // 양쪽 결과 모두 표시
             document.getElementById('result-ko').classList.add('show');
             document.getElementById('result-en').classList.add('show');
 
-            // 결과로 스크롤
             document.getElementById('result-ko').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // 음식 칼로리 데이터베이스 (100g 기준)
+        const foodDatabase = {
+            // 한국 음식
+            '밥': 130, '백미': 130, '현미': 110, '쌀밥': 130,
+            '김치': 15, '배추김치': 15,
+            '된장찌개': 50, '김치찌개': 60, '순두부찌개': 80,
+            '불고기': 180, '갈비': 250, '삼겹살': 330,
+            '치킨': 230, '닭가슴살': 165, '계란': 155,
+            '라면': 380, '떡볶이': 120, '김밥': 180,
+            '비빔밥': 140, '냉면': 130, '짜장면': 150,
+            
+            // 과일
+            '사과': 52, '바나나': 89, '오렌지': 47, '딸기': 32,
+            '수박': 30, '포도': 69, '복숭아': 39, '배': 57,
+            '키위': 61, '망고': 60, '파인애플': 50, '체리': 50,
+            
+            // 채소
+            '양배추': 25, '상추': 15, '오이': 15, '토마토': 18,
+            '당근': 41, '브로콜리': 34, '시금치': 23, '양파': 40,
+            
+            // 고기
+            '소고기': 250, '돼지고기': 242, '닭고기': 165,
+            '삼치': 200, '고등어': 205, '연어': 208,
+            
+            // 빵/간식
+            '식빵': 265, '크로와상': 406, '베이글': 250,
+            '초콜릿': 546, '감자칩': 536, '쿠키': 502,
+            
+            // 음료
+            '우유': 61, '두유': 54, '요거트': 59,
+            '콜라': 42, '사이다': 38, '주스': 45,
+            
+            // 영어 음식명
+            'apple': 52, 'banana': 89, 'orange': 47, 'strawberry': 32,
+            'rice': 130, 'chicken': 165, 'beef': 250, 'pork': 242,
+            'bread': 265, 'egg': 155, 'milk': 61, 'yogurt': 59,
+            'chocolate': 546, 'cookie': 502, 'pizza': 266,
+            'burger': 250, 'fries': 312, 'pasta': 131,
+            'salmon': 208, 'tuna': 184, 'shrimp': 99,
+            'broccoli': 34, 'carrot': 41, 'tomato': 18,
+            'potato': 77, 'sweet potato': 86,
+        };
+
+        async function searchFoodCalories() {
+            const searchInput = document.getElementById('food-search').value.trim().toLowerCase();
+            const loading = document.getElementById('loading');
+            const errorMsg = document.getElementById('error-message');
+            const result = document.getElementById('food-result');
+            const searchBtn = document.getElementById('search-btn');
+
+            if (!searchInput) {
+                errorMsg.textContent = '음식 이름을 입력해주세요! | Please enter a food name!';
+                errorMsg.classList.add('show');
+                setTimeout(() => errorMsg.classList.remove('show'), 3000);
+                return;
+            }
+
+            // 로딩 시작
+            loading.style.display = 'block';
+            errorMsg.classList.remove('show');
+            result.classList.remove('show');
+            searchBtn.disabled = true;
+
+            // 데이터베이스에서 검색
+            let caloriesPer100g = foodDatabase[searchInput];
+
+            if (caloriesPer100g) {
+                displayFoodResult(searchInput, caloriesPer100g);
+            } else {
+                // 유사한 음식 찾기
+                const similarFoods = findSimilarFoods(searchInput);
+                if (similarFoods.length > 0) {
+                    caloriesPer100g = foodDatabase[similarFoods[0]];
+                    displayFoodResult(similarFoods[0], caloriesPer100g);
+                } else {
+                    // 기본값 표시
+                    errorMsg.textContent = `"${searchInput}"에 대한 정확한 데이터를 찾을 수 없습니다. 일반적인 음식 칼로리를 표시합니다. | Cannot find exact data for "${searchInput}". Showing general food calories.`;
+                    errorMsg.classList.add('show');
+                    displayFoodResult(searchInput, 150); // 기본값
+                }
+            }
+
+            loading.style.display = 'none';
+            searchBtn.disabled = false;
+        }
+
+        function findSimilarFoods(searchTerm) {
+            const results = [];
+            for (let food in foodDatabase) {
+                if (food.includes(searchTerm) || searchTerm.includes(food)) {
+                    results.push(food);
+                }
+            }
+            return results;
+        }
+
+        function displayFoodResult(foodName, caloriesPer100g) {
+            const result = document.getElementById('food-result');
+            const foodNameDiv = document.getElementById('food-name');
+            const gramGrid = document.getElementById('gram-grid');
+
+            foodNameDiv.textContent = `${foodName.charAt(0).toUpperCase() + foodName.slice(1)} (${caloriesPer100g} kcal / 100g)`;
+
+            gramGrid.innerHTML = '';
+            [100, 200, 300, 400, 500].forEach(grams => {
+                const calories = Math.round((caloriesPer100g * grams) / 100);
+                const gramItem = document.createElement('div');
+                gramItem.className = 'gram-item';
+                gramItem.innerHTML = `
+                    <div class="gram-amount">${grams}g</div>
+                    <div class="gram-calories">${calories} kcal</div>
+                `;
+                gramGrid.appendChild(gramItem);
+            });
+
+            result.classList.add('show');
+            result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
         // Enter 키로 계산
         document.querySelectorAll('input').forEach(input => {
             input.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
-                    calculateCalories();
+                    if (this.id === 'food-search') {
+                        searchFoodCalories();
+                    } else {
+                        calculateCalories();
+                    }
                 }
             });
         });
