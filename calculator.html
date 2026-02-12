@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calorie Calculator | 칼로리 계산기</title>
+    <meta name="description" content="Free Calorie Calculator - BMR, TDEE Calculator & Food Calories">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .lang-switch {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .lang-switch-btn {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+        }
+
+        .lang-switch-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            justify-content: center;
+        }
+
+        .tab-btn {
+            padding: 12px 30px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .calculators-wrapper {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .calculator-container {
+            background: white;
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .single-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+
+        .input-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 8px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .radio-option input[type="radio"] {
+            width: auto;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .result {
+            margin-top: 25px;
+            padding: 25px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 15px;
+            color: white;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result h3 {
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        .calorie-item {
+            background: rgba(255,255,255,0.2);
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .calorie-label {
+            font-size: 13px;
+            margin-bottom: 3px;
+        }
+
+        .calorie-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .food-result {
+            margin-top: 25px;
+            padding: 25px;
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            border-radius: 15px;
+            color: white;
+            display: none;
+        }
+
+        .food-result.show {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
+        .food-result h3 {
+            margin-bottom: 15px;
+            font-size: 22px;
+        }
+
+        .food-name {
+            font-size: 26px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .gram-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .gram-item {
+            background: rgba(255,255,255,0.25);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .gram-amount {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .gram-calories {
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .running-info {
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 8px;
+        }
+
+        .running-time {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #ff6b6b;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .info-box {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .info-box h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 22px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .info-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .info-item strong {
+            color: #667eea;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .info-item p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: white;
+            font-size: 14px;
+        }
+
+        @media (max-width: 1024px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .gram-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 28px;
+            }
+
+            .calculator-container, .single-container {
+                padding: 25px;
+            }
+
+            h2 {
+                font-size: 24px;
+            }
+
+            .tab-buttons {
+                flex-direction: column;
+            }
+
+            .tab-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 언어 전환 버튼 -->
+    <div class="lang-switch">
+        <button class="lang-switch-btn" onclick="switchLanguage()">
+            <span id="lang-switch-text">🇰🇷 한국어</span>
+        </button>
+    </div>
+
+    <div class="header">
+        <h1 id="main-title">🔥 Calorie Calculator</h1>
+        <p id="main-subtitle">Manage your weight and food calories!</p>
+    </div>
+
+    <div class="main-container">
+        <!-- 탭 버튼 -->
+        <div class="tab-buttons">
+            <button class="tab-btn active" onclick="switchTab('bmr')">
+                <span id="tab-weight">💪 Weight</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('food')">
+                <span id="tab-food">🍽️ Food</span>
+            </button>
+        </div>
+
+        <!-- BMR/TDEE 계산기 탭 -->
+        <div id="bmr-tab" class="tab-content active">
+            <div class="calculators-wrapper">
+                <div class="calculator-container">
+                    <h2 id="calc-title">Calorie Calculator</h2>
+                    <p class="subtitle" id="calc-subtitle">Calculate your daily calorie needs</p>
+
+                    <div class="input-group">
+                        <label id="label-gender">Gender</label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="male" name="gender" value="male" checked>
+                                <label for="male" id="label-male">Male</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="female" name="gender" value="female">
+                                <label for="female" id="label-female">Female</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="age" id="label-age">Age (years)</label>
+                        <input type="number" id="age" placeholder="e.g., 25" min="1" max="120">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="height" id="label-height">Height (cm)</label>
+                        <input type="number" id="height" placeholder="e.g., 170" min="100" max="250">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="weight" id="label-weight">Weight (kg)</label>
+                        <input type="number" id="weight" placeholder="e.g., 65" min="20" max="300">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="activity" id="label-activity">Activity Level</label>
+                        <select id="activity">
+                            <option value="1.2" id="opt-sedentary">Sedentary (0-1 times/week)</option>
+                            <option value="1.375" id="opt-light">Lightly Active (2-3 times/week)</option>
+                            <option value="1.55" selected id="opt-moderate">Moderately Active (3-5 times/week)</option>
+                            <option value="1.725" id="opt-very">Very Active (6-7 times/week)</option>
+                            <option value="1.9" id="opt-extreme">Extremely Active (2x per day)</option>
+                        </select>
+                    </div>
+
+                    <button onclick="calculateCalories()" id="btn-calculate">Calculate</button>
+
+                    <div id="result" class="result">
+                        <h3 id="result-title">📊 Results</h3>
+                        <div class="calorie-item">
+                            <div class="calorie-label" id="label-bmr">Basal Metabolic Rate (BMR)</div>
+                            <div class="calorie-value" id="bmr-value">-</div>
+                        </div>
+                        <div class="calorie-item">
+                            <div class="calorie-label" id="label-tdee">Maintenance Calories (TDEE)</div>
+                            <div class="calorie-value" id="tdee-value">-</div>
+                        </div>
+                        <div class="calorie-item">
+                            <div class="calorie-label" id="label-diet">Weight Loss Calories</div>
+                            <div class="calorie-value" id="diet-value">-</div>
+                        </div>
+                        <div class="calorie-item">
+                            <div class="calorie-label" id="label-bulk">Weight Gain Calories</div>
+                            <div class="calorie-value" id="bulk-value">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <h3 id="info-title">💡 Information Guide</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <strong>BMR</strong>
+                        <p id="info-bmr">Calories burned at rest</p>
+                    </div>
+                    <div class="info-item">
+                        <strong>TDEE</strong>
+                        <p id="info-tdee">Total daily energy expenditure</p>
+                    </div>
+                    <div class="info-item">
+                        <strong id="info-loss-title">Weight Loss</strong>
+                        <p id="info-loss">Recommended for weight loss (-500kcal)</p>
+                    </div>
+                    <div class="info-item">
+                        <strong id="info-gain-title">Weight Gain</strong>
+                        <p id="info-gain">Recommended for muscle gain (+500kcal)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 음식 칼로리 검색 탭 -->
+        <div id="food-tab" class="tab-content">
+            <div class="single-container">
+                <h2 id="food-title">🍽️ Food Calorie Search</h2>
+                <p class="subtitle" id="food-subtitle">Enter a food name to check calories from 100g to 500g</p>
+
+                <div class="input-group">
+                    <label for="food-search" id="label-food-name">Food Name</label>
+                    <input type="text" id="food-search" placeholder="e.g., apple, chicken, rice">
+                </div>
+
+                <button onclick="searchFoodCalories()" id="btn-search">Search</button>
+
+                <div id="loading" class="loading" style="display: none;">
+                    <div class="loading-spinner"></div>
+                    <p id="loading-text">Searching...</p>
+                </div>
+
+                <div id="error-message" class="error-message"></div>
+
+                <div id="food-result" class="food-result">
+                    <h3 id="food-result-title">🍴 Search Results</h3>
+                    <div class="food-name" id="food-name"></div>
+                    <div class="gram-grid" id="gram-grid"></div>
+                </div>
+
+                <div class="info-box" style="margin-top: 30px;">
+                    <h3 id="tips-title">📝 Tips</h3>
+                    <div class="info-item">
+                        <strong id="tips-subtitle">For accurate search</strong>
+                        <p id="tips-1">• Enter food name in Korean or English (e.g., apple, 사과)</p>
+                        <p id="tips-2">• Simple names work better (e.g., rice, chicken, banana)</p>
+                        <p id="tips-3">• Calories calculated per 100g</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p id="footer-1">Healthy weight loss takes time!</p>
+        <p id="footer-2">Extreme calorie restriction may be harmful</p>
+    </footer>
+
+    <script>
+        // 언어 설정
+        const translations = {
+            en: {
+                mainTitle: "🔥 Calorie Calculator",
+                mainSubtitle: "Manage your weight and food calories!",
+                tabWeight: "💪 Weight",
+                tabFood: "🍽️ Food",
+                calcTitle: "Calorie Calculator",
+                calcSubtitle: "Calculate your daily calorie needs",
+                labelGender: "Gender",
+                labelMale: "Male",
+                labelFemale: "Female",
+                labelAge: "Age (years)",
+                labelHeight: "Height (cm)",
+                labelWeight: "Weight (kg)",
+                labelActivity: "Activity Level",
+                optSedentary: "Sedentary (0-1 times/week)",
+                optLight: "Lightly Active (2-3 times/week)",
+                optModerate: "Moderately Active (3-5 times/week)",
+                optVery: "Very Active (6-7 times/week)",
+                optExtreme: "Extremely Active (2x per day)",
+                btnCalculate: "Calculate",
+                resultTitle: "📊 Results",
+                labelBmr: "Basal Metabolic Rate (BMR)",
+                labelTdee: "Maintenance Calories (TDEE)",
+                labelDiet: "Weight Loss Calories",
+                labelBulk: "Weight Gain Calories",
+                infoTitle: "💡 Information Guide",
+                infoBmr: "Calories burned at rest",
+                infoTdee: "Total daily energy expenditure",
+                infoLossTitle: "Weight Loss",
+                infoLoss: "Recommended for weight loss (-500kcal)",
+                infoGainTitle: "Weight Gain",
+                infoGain: "Recommended for muscle gain (+500kcal)",
+                foodTitle: "🍽️ Food Calorie Search",
+                foodSubtitle: "Enter a food name to check calories from 100g to 500g",
+                labelFoodName: "Food Name",
+                placeholderFood: "e.g., apple, chicken, rice",
+                btnSearch: "Search",
+                loadingText: "Searching...",
+                foodResultTitle: "🍴 Search Results",
+                tipsTitle: "📝 Tips",
+                tipsSubtitle: "For accurate search",
+                tips1: "• Enter food name in Korean or English (e.g., apple, 사과)",
+                tips2: "• Simple names work better (e.g., rice, chicken, banana)",
+                tips3: "• Calories calculated per 100g",
+                footer1: "Healthy weight loss takes time!",
+                footer2: "Extreme calorie restriction may be harmful",
+                alertFillFields: "Please fill in all fields!",
+                alertEnterFood: "Please enter a food name!",
+                errorNotFound: "Cannot find calorie information for \"{food}\". Please try another food.",
+                runningLabel: "🏃 Light Running",
+                runningMinutes: "{min} min",
+                langSwitchText: "🇰🇷 한국어",
+                placeholderAge: "e.g., 25",
+                placeholderHeight: "e.g., 170",
+                placeholderWeight: "e.g., 65"
+            },
+            ko: {
+                mainTitle: "🔥 칼로리 계산기",
+                mainSubtitle: "체중 관리와 음식 칼로리를 한 번에!",
+                tabWeight: "💪 체중 관리",
+                tabFood: "🍽️ 음식 칼로리",
+                calcTitle: "칼로리 계산기",
+                calcSubtitle: "하루 권장 칼로리를 계산해보세요",
+                labelGender: "성별",
+                labelMale: "남성",
+                labelFemale: "여성",
+                labelAge: "나이 (세)",
+                labelHeight: "키 (cm)",
+                labelWeight: "체중 (kg)",
+                labelActivity: "활동 수준",
+                optSedentary: "거의 운동 안함 (주 0-1회)",
+                optLight: "가벼운 활동 (주 2-3회)",
+                optModerate: "보통 활동 (주 3-5회)",
+                optVery: "활발한 활동 (주 6-7회)",
+                optExtreme: "매우 활발 (하루 2회 운동)",
+                btnCalculate: "계산하기",
+                resultTitle: "📊 계산 결과",
+                labelBmr: "기초대사량 (BMR)",
+                labelTdee: "유지 칼로리 (TDEE)",
+                labelDiet: "다이어트 칼로리",
+                labelBulk: "증량 칼로리",
+                infoTitle: "💡 정보 안내",
+                infoBmr: "아무것도 하지 않아도 소모되는 칼로리",
+                infoTdee: "일상 활동을 포함한 하루 소모 칼로리",
+                infoLossTitle: "다이어트",
+                infoLoss: "체중 감량을 위한 권장 칼로리 (-500kcal)",
+                infoGainTitle: "증량",
+                infoGain: "근육량 증가를 위한 권장 칼로리 (+500kcal)",
+                foodTitle: "🍽️ 음식 칼로리 검색",
+                foodSubtitle: "음식 이름을 입력하면 100g ~ 500g까지의 칼로리를 확인할 수 있습니다",
+                labelFoodName: "음식 이름",
+                placeholderFood: "예: 사과, 치킨, 밥",
+                btnSearch: "검색하기",
+                loadingText: "검색 중입니다...",
+                foodResultTitle: "🍴 검색 결과",
+                tipsTitle: "📝 사용 팁",
+                tipsSubtitle: "정확한 검색을 위해",
+                tips1: "• 한국어나 영어로 음식 이름 입력 (예: 사과, apple)",
+                tips2: "• 간단한 이름이 더 정확합니다 (예: 밥, 치킨, 바나나)",
+                tips3: "• 100g 기준 칼로리를 자동으로 계산합니다",
+                footer1: "건강한 다이어트는 천천히!",
+                footer2: "급격한 칼로리 제한은 건강에 해로울 수 있습니다",
+                alertFillFields: "모든 항목을 입력해주세요!",
+                alertEnterFood: "음식 이름을 입력해주세요!",
+                errorNotFound: "\"{food}\"에 대한 칼로리 정보를 찾을 수 없습니다. 다른 음식을 검색해보세요.",
+                runningLabel: "🏃 가벼운 러닝",
+                runningMinutes: "{min}분",
+                langSwitchText: "🇺🇸 English",
+                placeholderAge: "예: 25",
+                placeholderHeight: "예: 170",
+                placeholderWeight: "예: 65"
+            }
+        };
+
+        let currentLang = localStorage.getItem('selectedLanguage') || 'en';
+
+        // 페이지 로드 시 언어 적용
+        window.addEventListener('DOMContentLoaded', function() {
+            applyLanguage(currentLang);
+        });
+
+        function applyLanguage(lang) {
+            currentLang = lang;
+            const t = translations[lang];
+
+            // 모든 텍스트 업데이트
+            document.getElementById('main-title').textContent = t.mainTitle;
+            document.getElementById('main-subtitle').textContent = t.mainSubtitle;
+            document.getElementById('tab-weight').textContent = t.tabWeight;
+            document.getElementById('tab-food').textContent = t.tabFood;
+            document.getElementById('calc-title').textContent = t.calcTitle;
+            document.getElementById('calc-subtitle').textContent = t.calcSubtitle;
+            document.getElementById('label-gender').textContent = t.labelGender;
+            document.getElementById('label-male').textContent = t.labelMale;
+            document.getElementById('label-female').textContent = t.labelFemale;
+            document.getElementById('label-age').textContent = t.labelAge;
+            document.getElementById('label-height').textContent = t.labelHeight;
+            document.getElementById('label-weight').textContent = t.labelWeight;
+            document.getElementById('label-activity').textContent = t.labelActivity;
+            document.getElementById('opt-sedentary').textContent = t.optSedentary;
+            document.getElementById('opt-light').textContent = t.optLight;
+            document.getElementById('opt-moderate').textContent = t.optModerate;
+            document.getElementById('opt-very').textContent = t.optVery;
+            document.getElementById('opt-extreme').textContent = t.optExtreme;
+            document.getElementById('btn-calculate').textContent = t.btnCalculate;
+            document.getElementById('result-title').textContent = t.resultTitle;
+            document.getElementById('label-bmr').textContent = t.labelBmr;
+            document.getElementById('label-tdee').textContent = t.labelTdee;
+            document.getElementById('label-diet').textContent = t.labelDiet;
+            document.getElementById('label-bulk').textContent = t.labelBulk;
+            document.getElementById('info-title').textContent = t.infoTitle;
+            document.getElementById('info-bmr').textContent = t.infoBmr;
+            document.getElementById('info-tdee').textContent = t.infoTdee;
+            document.getElementById('info-loss-title').textContent = t.infoLossTitle;
+            document.getElementById('info-loss').textContent = t.infoLoss;
+            document.getElementById('info-gain-title').textContent = t.infoGainTitle;
+            document.getElementById('info-gain').textContent = t.infoGain;
+            document.getElementById('food-title').textContent = t.foodTitle;
+            document.getElementById('food-subtitle').textContent = t.foodSubtitle;
+            document.getElementById('label-food-name').textContent = t.labelFoodName;
+            document.getElementById('food-search').placeholder = t.placeholderFood;
+            document.getElementById('btn-search').textContent = t.btnSearch;
+            document.getElementById('loading-text').textContent = t.loadingText;
+            document.getElementById('food-result-title').textContent = t.foodResultTitle;
+            document.getElementById('tips-title').textContent = t.tipsTitle;
+            document.getElementById('tips-subtitle').textContent = t.tipsSubtitle;
+            document.getElementById('tips-1').textContent = t.tips1;
+            document.getElementById('tips-2').textContent = t.tips2;
+            document.getElementById('tips-3').textContent = t.tips3;
+            document.getElementById('footer-1').textContent = t.footer1;
+            document.getElementById('footer-2').textContent = t.footer2;
+            document.getElementById('lang-switch-text').textContent = t.langSwitchText;
+            document.getElementById('age').placeholder = t.placeholderAge;
+            document.getElementById('height').placeholder = t.placeholderHeight;
+            document.getElementById('weight').placeholder = t.placeholderWeight;
+
+            localStorage.setItem('selectedLanguage', lang);
+        }
+
+        function switchLanguage() {
+            const newLang = currentLang === 'en' ? 'ko' : 'en';
+            applyLanguage(newLang);
+        }
+
+        // 탭 전환
+        function switchTab(tab) {
+            const tabs = document.querySelectorAll('.tab-content');
+            const buttons = document.querySelectorAll('.tab-btn');
+            
+            tabs.forEach(t => t.classList.remove('active'));
+            buttons.forEach(b => b.classList.remove('active'));
+            
+            if (tab === 'bmr') {
+                document.getElementById('bmr-tab').classList.add('active');
+                buttons[0].classList.add('active');
+            } else {
+                document.getElementById('food-tab').classList.add('active');
+                buttons[1].classList.add('active');
+            }
+        }
+
+        function calculateCalories() {
+            const t = translations[currentLang];
+            const gender = document.querySelector('input[name="gender"]:checked').value;
+            const age = parseFloat(document.getElementById('age').value);
+            const height = parseFloat(document.getElementById('height').value);
+            const weight = parseFloat(document.getElementById('weight').value);
+            const activity = parseFloat(document.getElementById('activity').value);
+
+            if (!age || !height || !weight) {
+                alert(t.alertFillFields);
+                return;
+            }
+
+            let bmr;
+            if (gender === 'male') {
+                bmr = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);
+            } else {
+                bmr = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
+            }
+
+            const tdee = bmr * activity;
+            const dietCalories = tdee - 500;
+            const bulkCalories = tdee + 500;
+
+            document.getElementById('bmr-value').textContent = Math.round(bmr) + ' kcal';
+            document.getElementById('tdee-value').textContent = Math.round(tdee) + ' kcal';
+            document.getElementById('diet-value').textContent = Math.round(dietCalories) + ' kcal';
+            document.getElementById('bulk-value').textContent = Math.round(bulkCalories) + ' kcal';
+
+            document.getElementById('result').classList.add('show');
+            document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // 음식 칼로리 데이터베이스 (100g 기준)
+        const foodDatabase = {
+            '밥': 130, '백미': 130, '현미': 110, '쌀밥': 130,
+            '김치': 15, '배추김치': 15,
+            '된장찌개': 50, '김치찌개': 60, '순두부찌개': 80,
+            '불고기': 180, '갈비': 250, '삼겹살': 330,
+            '치킨': 230, '닭가슴살': 165, '계란': 155,
+            '라면': 380, '떡볶이': 120, '김밥': 180,
+            '비빔밥': 140, '냉면': 130, '짜장면': 150,
+            '만두': 200, '군만두': 220, '물만두': 180,
+            '피자': 266, '햄버거': 250, '치즈버거': 280,
+            '돈까스': 300, '탕수육': 250, '짬뽕': 100,
+            '칼국수': 90, '수제비': 85, '국밥': 100,
+            '사과': 52, '바나나': 89, '오렌지': 47, '딸기': 32,
+            '수박': 30, '포도': 69, '복숭아': 39, '배': 57,
+            '키위': 61, '망고': 60, '파인애플': 50, '체리': 50,
+            '양배추': 25, '상추': 15, '오이': 15, '토마토': 18,
+            '당근': 41, '브로콜리': 34, '시금치': 23, '양파': 40,
+            '소고기': 250, '돼지고기': 242, '닭고기': 165,
+            '삼치': 200, '고등어': 205, '연어': 208,
+            '식빵': 265, '크로와상': 406, '베이글': 250,
+            '초콜릿': 546, '감자칩': 536, '쿠키': 502,
+            '우유': 61, '두유': 54, '요거트': 59,
+            '콜라': 42, '사이다': 38, '주스': 45,
+            'apple': 52, 'banana': 89, 'orange': 47, 'strawberry': 32,
+            'rice': 130, 'chicken': 165, 'beef': 250, 'pork': 242,
+            'bread': 265, 'egg': 155, 'milk': 61, 'yogurt': 59,
+            'chocolate': 546, 'cookie': 502, 'pizza': 266,
+            'burger': 250, 'fries': 312, 'pasta': 131,
+            'salmon': 208, 'tuna': 184, 'shrimp': 99,
+            'broccoli': 34, 'carrot': 41, 'tomato': 18,
+            'potato': 77, 'sweet potato': 86,
+            'dumpling': 200, 'noodles': 138, 'ramen': 380,
+        };
+
+        async function searchFoodCalories() {
+            const t = translations[currentLang];
+            const searchInput = document.getElementById('food-search').value.trim().toLowerCase();
+            const loading = document.getElementById('loading');
+            const errorMsg = document.getElementById('error-message');
+            const result = document.getElementById('food-result');
+            const searchBtn = document.getElementById('btn-search');
+
+            if (!searchInput) {
+                errorMsg.textContent = t.alertEnterFood;
+                errorMsg.classList.add('show');
+                setTimeout(() => errorMsg.classList.remove('show'), 3000);
+                return;
+            }
+
+            loading.style.display = 'block';
+            errorMsg.classList.remove('show');
+            result.classList.remove('show');
+            searchBtn.disabled = true;
+
+            let caloriesPer100g = foodDatabase[searchInput];
+
+            if (caloriesPer100g) {
+                displayFoodResult(searchInput, caloriesPer100g);
+                loading.style.display = 'none';
+                searchBtn.disabled = false;
+            } else {
+                const similarFoods = findSimilarFoods(searchInput);
+                if (similarFoods.length > 0) {
+                    caloriesPer100g = foodDatabase[similarFoods[0]];
+                    displayFoodResult(similarFoods[0], caloriesPer100g);
+                    loading.style.display = 'none';
+                    searchBtn.disabled = false;
+                } else {
+                    loading.style.display = 'none';
+                    searchBtn.disabled = false;
+                    result.classList.remove('show');
+                    errorMsg.textContent = t.errorNotFound.replace('{food}', searchInput);
+                    errorMsg.classList.add('show');
+                }
+            }
+        }
+
+        function findSimilarFoods(searchTerm) {
+            const results = [];
+            for (let food in foodDatabase) {
+                if (food.includes(searchTerm) || searchTerm.includes(food)) {
+                    results.push(food);
+                }
+            }
+            return results;
+        }
+
+        function displayFoodResult(foodName, caloriesPer100g) {
+            const t = translations[currentLang];
+            const result = document.getElementById('food-result');
+            const foodNameDiv = document.getElementById('food-name');
+            const gramGrid = document.getElementById('gram-grid');
+
+            foodNameDiv.textContent = `${foodName.charAt(0).toUpperCase() + foodName.slice(1)} (${caloriesPer100g} kcal / 100g)`;
+
+            gramGrid.innerHTML = '';
+            [100, 200, 300, 400, 500].forEach(grams => {
+                const calories = Math.round((caloriesPer100g * grams) / 100);
+                const runningMinutes = Math.round(calories / 8);
+                
+                const gramItem = document.createElement('div');
+                gramItem.className = 'gram-item';
+                gramItem.innerHTML = `
+                    <div class="gram-amount">${grams}g</div>
+                    <div class="gram-calories">${calories} kcal</div>
+                    <div class="running-info">
+                        <div style="font-size: 14px; opacity: 0.9;">${t.runningLabel}</div>
+                        <div class="running-time">${t.runningMinutes.replace('{min}', runningMinutes)}</div>
+                    </div>
+                `;
+                gramGrid.appendChild(gramItem);
+            });
+
+            result.classList.add('show');
+            result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Enter 키로 계산
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    if (this.id === 'food-search') {
+                        searchFoodCalories();
+                    } else {
+                        calculateCalories();
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
